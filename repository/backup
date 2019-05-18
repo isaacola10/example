@@ -1,0 +1,74 @@
+<form action="add_event.php" method="post">
+  <input name="title" type="text" class="form-control" id="name" placeholder="Event Name">
+  <input type="date" name="dateAdded" class="form-control" id="email" title="Choose your desired date"  min="<?php echo date('Y-m-d'); ?>"/>
+    <input name="eventTime" type="time" class="form-control" id="email" placeholder="Event Time">
+    <select class="form-control" name="venue" id="name">
+      <option value="" disabled>SELECT VENUE</option>
+      <?php $sql = "SELECT venue FROM venues";
+          $result = mysqli_query($con, $sql);
+      if (mysqli_num_rows($result) > 0) {
+
+
+            while($row = mysqli_fetch_assoc($result))
+       {
+        ?>
+        <option value="<?php echo htmlentities($row['venue']);?>"><?php echo htmlentities($row['venue']);?></option>
+      <?php
+      }}
+      else{
+          echo "0 results";
+      }
+      ?>
+    </select>
+    <textarea name="descp" rows="5" class="form-control" id="message" placeholder="Event Description"></textarea>
+  <div class="col-md-6 col-sm-10">
+    <input name="submit" type="submit" class="form-control" id="submit" value="SEND">
+  </div>
+</form>
+
+<button class="btn btn-primary" type="submit" name="new_user">
+            <i class="fa fa-save"></i>
+            Add User
+          </button>
+
+******************************************************************************************************************************************************************************
+                                                                  Database Connection to Events
+******************************************************************************************************************************************************************************
+<?php
+
+if(isset($_POST['submit'])){
+  include('includes/connect.php');
+
+
+  $eventID = $_SESSION['email'];
+  $title = $_POST['title'];
+  $date = $_POST['dateAdded'];
+  $time = $_POST['eventTime'];
+  $venue = $_POST['venue'];
+  $description = $_POST['descp'];
+
+  $sql = mysqli_query($con, "SELECT id FROM events WHERE eventTime = '$time' LIMIT 1");
+  $dateMatch = mysqli_num_rows($sql); // count the output amount
+    if ($dateMatch > 0) {
+    echo 'Sorry You Cannot Have Two Events At The Same Venue At The Same Time on The Same Day, To Go Back <a href="account.php">click here</a>';
+    exit();
+  }
+
+
+  $sql = "INSERT INTO events(eventID, title, dateAdded, eventTime, created, modified, venue, descp, protApprov, CampApprov, stats) VALUES ('$eventID','$title', '$date', '$time', now(), now(), '$venue', '$description', 'Processing', ' ', ' ')";
+
+    if (mysqli_query($con, $sql)) {
+
+      echo header("Location:account.php");
+
+        } else {
+
+                echo "Error: " . $sql . "<br>" . mysqli_error($con);
+    }
+
+}
+
+
+
+
+ ?>
